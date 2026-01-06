@@ -1,6 +1,7 @@
 from flask import Blueprint, request 
 from extensions import db
 from models.user import User
+from flask_jwt_extended import create_access_token
 
 auth_bp= Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -35,5 +36,10 @@ def login():
 
     if not user or not user.check_password(password):
         return {"error": "Invalid email or password"}, 401
+    
+    access_token= create_access_token(identity=str(user.id))
 
-    return {"message": "Login successful", "user_id": user.id}, 200
+    return {
+        "message": "Login successful",
+        "access_token": access_token
+    }, 200

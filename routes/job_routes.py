@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from extensions import db
 from models.job import JobApplication
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 job_bp= Blueprint("jobs", __name__, url_prefix="/jobs")
 
 @job_bp.route("", methods= ["POST"])
+@jwt_required()
 def create_job():
     data= request.get_json()
 
@@ -16,19 +18,24 @@ def create_job():
     if not company or not role:
         return {"error": "Comapny and role required"}, 400
     
+    user_id = int(get_jwt_identity())
+
     job= JobApplication(
         company=company,
         role=role,
         status=status,
-        notes=notes
+        notes=notes,
+        user_id=user_id
     )
     db.session.add(job)
     db.session.commit()
     return {"message": "Job application created successfully", "job_id": job.id}, 201
 
 @job_bp.route("", methods=["GET"])
+@jwt_required()
 def get_all_jobs():
-    jobs= JobApplication.query.all()
+    user_id= get_jwt_identity()
+    jobs= JobApplication.query.filter_by(user_id=user_id).all()
 
     result= []
     for job in jobs:
