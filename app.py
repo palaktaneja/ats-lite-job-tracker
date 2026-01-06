@@ -2,6 +2,7 @@ from flask import Flask
 from config import Config
 from extensions import db
 from routes.job_routes import job_bp
+from routes.auth_routes import auth_bp
 
 def create_app():
     app = Flask(__name__)
@@ -12,6 +13,7 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(job_bp)
+    app.b
 
     @app.route("/")
     def home():
