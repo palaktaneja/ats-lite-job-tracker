@@ -13,7 +13,7 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(job_bp)
-    app.b
+    app.register_blueprint(auth_bp)
 
     @app.route("/")
     def home():

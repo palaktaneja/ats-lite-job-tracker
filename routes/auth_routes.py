@@ -4,7 +4,7 @@ from models.user import User
 
 auth_bp= Blueprint("auth", __name__, url_prefix="/auth")
 
-@auth_bp.route("/register", methods="POST")
+@auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
 
@@ -14,7 +14,7 @@ def register():
 
     if not name or not email or not password:
         return {"error": "Name, email and password are required"}, 400
-    
+
     if User.query.filter_by(email=email).first():
         return {"error": "User already exists"}, 400
     
