@@ -40,3 +40,38 @@ def get_all_jobs():
             "notes": job.notes
         })
     return jsonify(result), 200
+
+@job_bp.route("/<int:job_id>", methods=["PUT"])
+def update_job(job_id):
+    job = JobApplication.query.get(job_id)
+
+    if not job:
+        return {"error": "Job application not found"}, 404
+
+    data = request.get_json()
+
+    job.company = data.get("company", job.company)
+    job.role = data.get("role", job.role)
+    job.status = data.get("status", job.status)
+    job.notes = data.get("notes", job.notes)
+
+    db.session.commit()
+
+    return {
+        "message": "Job application updated successfully"
+    }, 200
+
+
+@job_bp.route("/<int:job_id>", methods=["DELETE"])
+def delete_job(job_id):
+    job = JobApplication.query.get(job_id)
+
+    if not job:
+        return {"error": "Job application not found"}, 404
+
+    db.session.delete(job)
+    db.session.commit()
+
+    return {
+        "message": "Job application deleted successfully"
+    }, 200
