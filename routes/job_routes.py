@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from extensions import db
 from models.job import JobApplication
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from workers.background_worker import send_reminder
 
 job_bp= Blueprint("jobs", __name__, url_prefix="/jobs")
 
@@ -27,8 +28,10 @@ def create_job():
         notes=notes,
         user_id=user_id
     )
+
     db.session.add(job)
     db.session.commit()
+    send_reminder(job.id, user_id)
     return {"message": "Job application created successfully", "job_id": job.id}, 201
 
 @job_bp.route("", methods=["GET"])
