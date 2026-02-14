@@ -1,11 +1,10 @@
-from flask import Blueprint, request 
-from app.core.extensions import db
-from app.models.user import User
-from app.core.exceptions import ConflictException
-from app.services.auth_service import register_user
-from flask_jwt_extended import create_access_token
+from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 
-auth_bp= Blueprint("auth", __name__, url_prefix="/auth")
+from app.services.auth_service import register_user, login_user
+
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
@@ -22,20 +21,25 @@ def register():
 
     return {"message": "User registered successfully"}, 201
 
+
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    data= request.get_json()
-    email= data.get("email")
-    password= data.get("password")
+    data = request.get_json()
 
-    user= User.query.filter_by(email=email).first()
+    email = data.get("email")
+    password = data.get("password")
 
-    if not user or not user.check_password(password):
+    tokens = login_user(email, password)
+
+    if not tokens:
         return {"error": "Invalid email or password"}, 401
-    
-    access_token= create_access_token(identity=str(user.id))
 
-    return {
-        "message": "Login successful",
-        "access_token": access_token
-    }, 200
+    return tokens, 200
+
+@auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    user_id = get_jwt_identity()
+    new_access_token = create_access_token(identity=user_id)
+
+    return {"access_token": new_access_token}, 200
