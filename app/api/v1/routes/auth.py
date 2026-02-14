@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from flask_jwt_extended import jwt_required, get_jwt
 from app.core.redis_client import get_redis_client
-
+from app.core.rate_limiter import rate_limit
 from app.services.auth_service import register_user, login_user
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -39,6 +39,15 @@ def login():
 
     email = data.get("email")
     password = data.get("password")
+
+    if not email or not password:
+        return {"error": "Email and password required"}, 400
+
+    rate_limit(
+        key=f"login:{email}",
+        limit=5,
+        window_seconds=60
+    )
 
     tokens = login_user(email, password)
 
