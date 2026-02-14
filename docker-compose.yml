@@ -23,3 +23,8 @@ services:
     command: celery -A app.tasks.celery_app.celery worker --loglevel=info
     depends_on:
       - redis
+  
+  ats-api:
+    build: .
+    env_file:
+      - .env
