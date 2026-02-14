@@ -1,6 +1,8 @@
 from flask import Blueprint, request 
 from app.core.extensions import db
 from app.models.user import User
+from app.core.exceptions import ConflictException
+from app.services.auth_service import register_user
 from flask_jwt_extended import create_access_token
 
 auth_bp= Blueprint("auth", __name__, url_prefix="/auth")
@@ -9,20 +11,14 @@ auth_bp= Blueprint("auth", __name__, url_prefix="/auth")
 def register():
     data = request.get_json()
 
-    name= data.get("name")
-    email= data.get("email")
-    password= data.get("password")
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
 
     if not name or not email or not password:
-        return {"error": "Name, email and password are required"}, 400
+        return {"error": "Missing fields"}, 400
 
-    if User.query.filter_by(email=email).first():
-        return {"error": "User already exists"}, 400
-    
-    user= User(name=name, email=email)
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
+    register_user(name, email, password)
 
     return {"message": "User registered successfully"}, 201
 
