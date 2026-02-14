@@ -13,6 +13,7 @@ from flask_jwt_extended import JWTManager
 from flask_jwt_extended import get_jwt
 
 from app.core.redis_client import get_redis_client
+from app.core.logging_config import setup_logging
 
 
 def register_jwt_callbacks(jwt):
@@ -41,6 +42,7 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
     register_error_handlers(app)
+    setup_logging()
 
 
     # Register blueprints
