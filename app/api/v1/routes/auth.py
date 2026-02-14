@@ -1,10 +1,21 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt
+from app.core.redis_client import get_redis_client
 
 from app.services.auth_service import register_user, login_user
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
+@auth_bp.route("/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    redis_client = get_redis_client()
+
+    redis_client.setex(jti, 3600, "revoked")  # expire after 1 hour
+
+    return {"message": "Successfully logged out"}
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

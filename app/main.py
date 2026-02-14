@@ -9,6 +9,19 @@ from app.api.v1.routes.auth import auth_bp
 from app.core.exceptions import AppException
 from flask import jsonify
 
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import get_jwt
+from app.core.redis_client import get_redis_client
+
+def register_jwt_callbacks(jwt):
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        redis_client = get_redis_client()
+
+        return redis_client.exists(jti)
+
 def register_error_handlers(app):
     @app.errorhandler(AppException)
     def handle_app_exception(error):
@@ -29,6 +42,8 @@ def create_app():
     # Register blueprints
     app.register_blueprint(job_bp)
     app.register_blueprint(auth_bp)
+
+    register_jwt_callbacks(jwt)
 
     # Create tables
     with app.app_context():
