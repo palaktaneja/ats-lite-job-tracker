@@ -28,3 +28,11 @@ services:
     build: .
     env_file:
       - .env
+  
+  analytics:
+    build: ./analytics-service
+    container_name: ats-analytics
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ats-api
