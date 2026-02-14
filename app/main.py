@@ -1,7 +1,7 @@
 from flask import Flask
 
 from app.core.config import Config
-from app.core.extensions import db, jwt
+from app.core.extensions import db, jwt, migrate
 
 from app.api.v1.routes.jobs import job_bp
 from app.api.v1.routes.auth import auth_bp
@@ -11,7 +11,9 @@ from flask import jsonify
 
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import get_jwt
+
 from app.core.redis_client import get_redis_client
+
 
 def register_jwt_callbacks(jwt):
 
@@ -37,17 +39,15 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
     register_error_handlers(app)
+
 
     # Register blueprints
     app.register_blueprint(job_bp)
     app.register_blueprint(auth_bp)
 
     register_jwt_callbacks(jwt)
-
-    # Create tables
-    with app.app_context():
-        db.create_all()
 
     @app.route("/")
     def home():
