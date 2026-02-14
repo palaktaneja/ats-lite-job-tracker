@@ -3,6 +3,9 @@ from app.core.extensions import db
 from app.core.exceptions import NotFoundException
 import json
 from app.core.redis_client import get_redis_client
+from app.tasks.email_tasks import send_job_notification
+
+send_job_notification.delay(JobApplication.title)
 
 def create_job(title: str, description: str, location: str):
     job = JobApplication(

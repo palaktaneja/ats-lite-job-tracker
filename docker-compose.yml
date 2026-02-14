@@ -16,3 +16,10 @@ services:
     container_name: ats-redis
     ports:
       - "6379:6379"
+
+  celery:
+    build: .
+    container_name: ats-celery
+    command: celery -A app.tasks.celery_app.celery worker --loglevel=info
+    depends_on:
+      - redis
