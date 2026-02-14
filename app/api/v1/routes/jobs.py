@@ -1,6 +1,9 @@
 from flask import request, Blueprint
 from app.api.v1.schemas.job_schema import JobCreateSchema, JobResponseSchema
 from marshmallow import ValidationError
+from flask_jwt_extended import jwt_required
+from app.api.v1.dependencies import role_required
+
 
 job_create_schema = JobCreateSchema()
 job_response_schema = JobResponseSchema()
@@ -13,15 +16,14 @@ from app.services.job_service import (
 )
 
 job_bp = Blueprint("jobs", __name__, url_prefix="/jobs")
+
 @job_bp.route("/", methods=["POST"])
+@jwt_required()
+@role_required("ADMIN")
 def add_job():
-    try:
-        data = job_create_schema.load(request.get_json())
-    except ValidationError as err:
-        return {"errors": err.messages}, 400
-
+    data = job_create_schema.load(request.get_json())
     job = create_job(**data)
-
+    
     return job_response_schema.dump(job), 201
 
 
