@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: ats-backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    environment:
+      - FLASK_ENV=development
+
+  redis:
+    image: redis:7
+    container_name: ats-redis
+    ports:
+      - "6379:6379"
