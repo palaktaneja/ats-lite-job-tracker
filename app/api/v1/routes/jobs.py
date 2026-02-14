@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from extensions import db
-from models.job import JobApplication
+from app.core.extensions import db
+from app.models.job import JobApplication
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from workers.background_worker import send_reminder
+from app.tasks.workers.background_worker import send_reminder
 
 job_bp= Blueprint("jobs", __name__, url_prefix="/jobs")
 

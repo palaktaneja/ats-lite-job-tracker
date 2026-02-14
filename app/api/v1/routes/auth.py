@@ -1,6 +1,6 @@
 from flask import Blueprint, request 
-from extensions import db
-from models.user import User
+from app.core.extensions import db
+from app.models.user import User
 from flask_jwt_extended import create_access_token
 
 auth_bp= Blueprint("auth", __name__, url_prefix="/auth")

@@ -1,4 +1,4 @@
-from extensions import db
+from app.core.extensions import db
 from datetime import datetime
 
 class JobApplication(db.Model):
